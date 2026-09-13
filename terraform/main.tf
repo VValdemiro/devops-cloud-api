@@ -273,3 +273,20 @@ output "github_actions_role_arn" {
   value       = aws_iam_role.github_actions.arn
   description = "ARN da IAM Role para o GitHub Actions"
 }
+resource "aws_ecs_service" "app" {
+  name            = "devops-cloud-api-service"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.app.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = [aws_subnet.public_a.id, aws_subnet.public_b.id]
+    security_groups  = [aws_security_group.ecs_tasks.id]
+    assign_public_ip = true
+  }
+
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
+}
